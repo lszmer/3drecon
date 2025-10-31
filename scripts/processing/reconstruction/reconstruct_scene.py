@@ -1,4 +1,5 @@
 from typing import Optional
+import time
 import open3d as o3d
 from tqdm import tqdm
 
@@ -89,7 +90,10 @@ def reconstruct_scene(data_io: DataIO, config: ReconstructionConfig):
 
         pcds = [vbg.extract_point_cloud().to_legacy()]
         axis = o3d.geometry.TriangleMesh.create_coordinate_frame(size=0.6, origin=[0, 0, 0])
-        o3d.visualization.draw_geometries(pcds + [axis], window_name="Colorless Point Cloud") # type: ignore        
+        _vis_t0 = time.time()
+        o3d.visualization.draw_geometries(pcds + [axis], window_name="Colorless Point Cloud") # type: ignore
+        _vis_t1 = time.time()
+        print(f"[VIS] COLORLESS_VIEW_SECONDS: {_vis_t1 - _vis_t0:.6f}")        
 
     # Color map optimization
     optimized_color_dataset_map = None
@@ -106,7 +110,10 @@ def reconstruct_scene(data_io: DataIO, config: ReconstructionConfig):
             print("[Info] Visualizing colored mesh ...")
             pcds = [colored_mesh]
             axis = o3d.geometry.TriangleMesh.create_coordinate_frame(size=0.6, origin=[0, 0, 0])
-            o3d.visualization.draw_geometries(pcds + [axis], window_name="Colored Mesh") # type: ignore        
+            _vis_t0 = time.time()
+            o3d.visualization.draw_geometries(pcds + [axis], window_name="Colored Mesh") # type: ignore
+            _vis_t1 = time.time()
+            print(f"[VIS] COLORED_VIEW_SECONDS: {_vis_t1 - _vis_t0:.6f}")        
 
         if config.sample_point_cloud_from_colored_mesh:
             vertex_count = len(colored_mesh.vertices)
