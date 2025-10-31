@@ -10,7 +10,6 @@ dependencies:
   - pandas
   - tqdm
   - opencv
-  - cudatoolkit=11.8
   - pyyaml
   - pip
   - pip:

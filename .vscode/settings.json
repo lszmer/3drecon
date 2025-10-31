@@ -3,5 +3,9 @@
     "python.analysis.typeCheckingMode": "basic",
     "python-envs.defaultEnvManager": "ms-python.python:conda",
     "python-envs.defaultPackageManager": "ms-python.python:conda",
-    "python-envs.pythonProjects": []
+    "python-envs.pythonProjects": [],
+    "cursorpyright.analysis.extraPaths": [
+        "scripts"
+    ],
+    "cursorpyright.analysis.typeCheckingMode": "basic"
 }

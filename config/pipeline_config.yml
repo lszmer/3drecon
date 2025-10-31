@@ -11,7 +11,7 @@ depth_to_linear:
   use_cache: True # Whether to use the depth dataset cache
 
 reconstruction:
-  device: "CUDA:0"  # Device to run Open3D Tensor operations (e.g., CUDA-enabled GPU)
+  device: "CPU:0"  # Device to run Open3D Tensor operations (CPU for Mac without CUDA)
 
   # pipeline
   use_dataset_cache: true  # Use preprocessed depth/color datasets if available
@@ -45,15 +45,15 @@ reconstruction:
     loop_yaw_info_density_threshold: 0.3  # Threshold on image gradient information for loop matching
     dist_threshold: 0.07  # Max correspondence distance in loop constraint construction
     edge_prune_threshold: 0.25  # Threshold to prune weak edges in the fragment graph
-    use_multi_threading: false
+    use_multi_threading: true
 
   fragment_pose_refinement:
     use_confidence_filtered_depth: true
     confidence_threshold: 0.05
     valid_count_threshold: 4 # Minimum number of supporting observations required to consider a depth pixel valid
-    voxel_size: 0.01  # TSDF voxel size
+    voxel_size: 0.005  # TSDF voxel size
     block_resolution: 16  # Resolution of each voxel block (in voxels)
-    block_count: 50000  # Total number of blocks in the TSDF volume
+    block_count: 80000  # Total number of blocks in the TSDF volume
     depth_max: 1.5
     trunc_voxel_multiplier: 8.0  # Truncation distance = multiplier * voxel size
     use_pre_filtering: true  # Pre-filter fragment alignments before ICP
@@ -70,7 +70,7 @@ reconstruction:
     icp_inlier_rmse_threshold: 0.05  # RMSE threshold to accept ICP result
     dist_threshold: 0.07
     edge_prune_threshold: 0.25
-    use_multi_threading: false
+    use_multi_threading: true
 
   depth_integration:
     use_confidence_filtered_depth: true
