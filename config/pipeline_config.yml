@@ -88,7 +88,7 @@ reconstruction:
     interval: 100  # Keyframe interval for color pose optimization
     max_iteration: 100  # Max number of iterations for pose refinement
     use_dataset_cache: true
-    min_triangle_count: 2000  # Minimum triangle count to keep a mesh component (filters out floating fragments)
+    min_triangle_count: 50000  # Minimum triangle count to keep a mesh component (filters out floating fragments)
 
   color_aligned_depth_rendering:
     weight_threshold: 3.0  # Minimum TSDF weight to extract mesh surface

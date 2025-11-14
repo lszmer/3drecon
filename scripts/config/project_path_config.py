@@ -234,8 +234,16 @@ class ReconstructionPathConfig:
         return self.project_dir / "reconstruction/color_mesh.ply"
     
 
+    def get_colorless_mesh_path(self) -> Path:
+        return self.project_dir / "reconstruction/colorless_mesh.ply"
+    
+
     def get_colored_pcd_path(self) -> Path:
-        return self.project_dir / "reconstruction/color.ply"
+        return self.project_dir / "reconstruction/color_pointcloud.ply"
+    
+
+    def get_colorless_pcd_path(self) -> Path:
+        return self.project_dir / "reconstruction/colorless_pointcloud.ply"
 
     
     def get_relative_path(self, path: Path) -> Path:

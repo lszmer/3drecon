@@ -15,8 +15,15 @@ def process_file(
     timestamp: int,
     image_io: ImageDataIO,
     filter: Optional[Callable[[np.ndarray], bool]] = None,
+    skip_if_exists: bool = True,
 ) -> bool:
     try:
+        # Check if RGB file already exists
+        if skip_if_exists:
+            rgb_file_path = image_io.image_path_config.get_rgb_file_path(side=side, timestamp=timestamp)
+            if rgb_file_path.exists():
+                return True  # File already exists, skip conversion
+        
         raw_data = image_io.load_yuv(side=side, timestamp=timestamp)
         format_info = image_io.load_image_format_info(side=side)
 
@@ -60,6 +67,21 @@ def convert_yuv_directory(
 
     for side in Side:
         yuv_timestamps = image_io.get_yuv_timestamps(side)
+        
+        # Check which RGB files already exist
+        existing_rgb_timestamps = set(image_io.get_rgb_timestamps(side))
+        yuv_timestamps_to_process = [
+            ts for ts in yuv_timestamps 
+            if ts not in existing_rgb_timestamps
+        ]
+        
+        skipped_count = len(yuv_timestamps) - len(yuv_timestamps_to_process)
+        if skipped_count > 0:
+            print(f"[Info] Skipping {skipped_count} already-converted RGB files for {side.name}")
+        
+        if len(yuv_timestamps_to_process) == 0:
+            print(f"[Info] All YUV files for {side.name} have already been converted to RGB. Skipping.")
+            continue
 
         excluded_count = 0
         processed_count = 0
@@ -67,8 +89,8 @@ def convert_yuv_directory(
 
         with ProcessPoolExecutor() as executor:
             futures = [
-                executor.submit(process_file, side, yuv_timestamp, image_io, filter)
-                for yuv_timestamp in yuv_timestamps
+                executor.submit(process_file, side, yuv_timestamp, image_io, filter, skip_if_exists=True)
+                for yuv_timestamp in yuv_timestamps_to_process
             ]
             for future in tqdm(as_completed(futures), total=len(futures), desc=f"Converting YUV to PNG ({side})"):
                 try:

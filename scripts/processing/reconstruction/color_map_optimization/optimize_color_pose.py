@@ -72,6 +72,17 @@ def optimize_color_pose(
             o3d.pipelines.color_map.RigidOptimizerOption(maximum_iteration=config.max_iteration)
         )
 
+    # Filter the colored mesh again after color optimization, as the optimization process
+    # may modify the mesh structure and could reintroduce small disconnected components
+    print("[Info] Filtering colored mesh after color optimization...")
+    colored_mesh_tensor = o3d.t.geometry.TriangleMesh.from_legacy(colored_mesh)
+    colored_mesh_tensor = colored_mesh_tensor.to(mesh.device)
+    colored_mesh_filtered = filter_mesh_components(
+        colored_mesh_tensor, 
+        min_triangle_count=config.min_triangle_count
+    )
+    colored_mesh = colored_mesh_filtered.to_legacy()
+
     trajectory_transforms = convert_trajectory_to_transforms(trajectory=trajectory)
 
     start_index = 0

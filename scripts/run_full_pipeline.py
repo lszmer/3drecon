@@ -20,11 +20,11 @@ def run_pipeline(project_dir: Path) -> float:
         ("scripts/convert_depth_to_linear_map.py", []),
         ("scripts/reconstruct_scene.py",
          ["--config", "config/pipeline_config.yml"]),
-        ("scripts/build_colmap_project.py",
-         ["--output_dir", str(project_dir / "COLMAP"),
-          "--use_colored_pointcloud",
-          "--use_optimized_color_dataset",
-          "--interval", "1"]),
+        #("scripts/build_colmap_project.py",
+        #  ["--output_dir", str(project_dir / "COLMAP"),
+        #   "--use_colored_pointcloud",
+        #   "--use_optimized_color_dataset",
+        #   "--interval", "1"]),
         #("scripts/visualize_confidence_maps.py", [])
     ]
 
