@@ -42,6 +42,7 @@ def parse_args():
         default=1,
         help="Sampling interval for image export. Use every N-th image."
     )
+    # Keep script generic for scene pipeline; object pipeline uses its own exporter
 
     args = parser.parse_args()
 

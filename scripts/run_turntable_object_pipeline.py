@@ -2,6 +2,7 @@ import argparse
 from pathlib import Path
 import subprocess
 import sys
+import yaml
 
 
 def run(cmd: list[str]):
@@ -13,7 +14,7 @@ def main():
     parser = argparse.ArgumentParser(description="Turntable Object Reconstruction Runner")
     parser.add_argument("--project_dir", type=Path, required=True, help="Path to the session directory (original structure)")
     parser.add_argument("--config", type=Path, default=Path("config/object_turntable.yml"), help="Config YAML path")
-    parser.add_argument("--stages", type=str, default="convert,depth,mask,reconstruct", help="Comma-separated stages: convert,depth,mask,reconstruct,colmap")
+    parser.add_argument("--stages", type=str, default="convert,depth,mask,fuse", help="Comma-separated stages: convert,depth,mask,fuse,reconstruct,colmap")
     parser.add_argument("--preset", type=str, default=None, help="Optional preset hint (unused at the moment)")
     parser.add_argument("--sample_step", type=int, default=None, help="(deprecated) preprocess only")
     parser.add_argument("--target_count", type=int, default=None, help="(deprecated) preprocess only")
@@ -39,7 +40,10 @@ def main():
         run([sys.executable, "scripts/reconstruct_scene.py", "--project_dir", str(work_dir), "--config", str(args.config)])
 
     if "colmap" in stages:
-        run([sys.executable, "scripts/build_colmap_project.py", "--project_dir", str(work_dir), "--output_dir", str(work_dir / "COLMAP"), "--use_colored_pointcloud", "--use_optimized_color_dataset", "--interval", "1"])
+        run([sys.executable, "scripts/export_colmap_turntable.py", "--project_dir", str(work_dir), "--output_dir", str(work_dir / "COLMAP_OBJECT")])
+
+    if "fuse" in stages:
+        run([sys.executable, "scripts/processing/reconstruction/fuse_turntable.py", "--project_dir", str(work_dir), "--config", str(args.config)])
 
 
 if __name__ == "__main__":

@@ -12,7 +12,7 @@ from processing.reconstruction.color_map_optimization.optimize_color_pose import
 from processing.reconstruction.confidence_estimation.estimate_depth_confidences import estimate_depth_confidences
 from processing.reconstruction.depth_optimization.depth_pose_optimizer import DepthPoseOptimizer
 from processing.reconstruction.utils.log_utils import log_step
-from processing.reconstruction.utils.o3d_utils import integrate, raycast_in_color_view
+from processing.reconstruction.utils.o3d_utils import integrate, raycast_in_color_view, filter_mesh_components
 
 
 def reconstruct_scene(data_io: DataIO, config: ReconstructionConfig):
@@ -133,6 +133,9 @@ def reconstruct_scene(data_io: DataIO, config: ReconstructionConfig):
             weight_threshold=config.color_aligned_depth_rendering.weight_threshold,
             estimated_vertex_number=config.color_aligned_depth_rendering.estimated_vertex_number
         )
+
+        # Filter out small disconnected mesh components (e.g., floating body parts)
+        mesh = filter_mesh_components(mesh, min_triangle_count=config.color_aligned_depth_rendering.min_triangle_count)
 
         scene = o3d.t.geometry.RaycastingScene(device=config.device)
         scene.add_triangles(mesh.cpu())

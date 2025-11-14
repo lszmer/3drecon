@@ -236,6 +236,58 @@ def integrate(
     return vbg
 
 
+def filter_mesh_components(
+    mesh: o3d.t.geometry.TriangleMesh,
+    min_triangle_count: int = 2000
+) -> o3d.t.geometry.TriangleMesh:
+    """
+    Filter out disconnected mesh components that have fewer triangles than the threshold.
+    This helps remove floating fragments (e.g., from body parts in head-level recordings)
+    while preserving the main connected mesh structure.
+    
+    Args:
+        mesh: Input triangle mesh
+        min_triangle_count: Minimum number of triangles required to keep a component
+        
+    Returns:
+        Filtered mesh with only components above the threshold
+    """
+    # Convert to legacy format for connected component analysis
+    mesh_legacy = mesh.to_legacy()
+    
+    # Find connected components
+    triangle_clusters, cluster_n_triangles, cluster_area = mesh_legacy.cluster_connected_triangles()
+    triangle_clusters = np.asarray(triangle_clusters)
+    cluster_n_triangles = np.asarray(cluster_n_triangles)
+    
+    # Create mask to keep only components with triangle count >= min_triangle_count
+    valid_clusters = np.where(cluster_n_triangles >= min_triangle_count)[0]
+    mask = np.isin(triangle_clusters, valid_clusters)
+    
+    # Remove triangles from small components
+    mesh_legacy.remove_triangles_by_mask(~mask)
+    mesh_legacy.remove_unreferenced_vertices()
+    
+    # Clean up degenerate triangles
+    mesh_legacy.remove_degenerate_triangles()
+    mesh_legacy.remove_duplicated_triangles()
+    mesh_legacy.remove_duplicated_vertices()
+    mesh_legacy.remove_non_manifold_edges()
+    
+    # Convert back to tensor format
+    filtered_mesh = o3d.t.geometry.TriangleMesh.from_legacy(mesh_legacy)
+    
+    # Preserve device
+    filtered_mesh = filtered_mesh.to(mesh.device)
+    
+    num_removed = len(triangle_clusters) - len(valid_clusters)
+    if num_removed > 0:
+        print(f"[Info] Removed {num_removed} small mesh component(s) with < {min_triangle_count} triangles")
+        print(f"[Info] Kept {len(valid_clusters)} component(s) with >= {min_triangle_count} triangles")
+    
+    return filtered_mesh
+
+
 def raycast_in_color_view(
     scene: o3d.t.geometry.RaycastingScene,
     dataset: CameraDataset
