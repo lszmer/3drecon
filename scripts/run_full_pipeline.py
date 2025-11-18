@@ -53,6 +53,28 @@ def run_pipeline(project_dir: Path) -> float:
 
     return view_seconds
 
+
+def convert_reconstruction_mesh_to_fbx(project_dir: Path) -> None:
+    """Convert the reconstructed color mesh PLY into FBX using Aspose utility."""
+    color_mesh_path = project_dir / "reconstruction" / "color_mesh.ply"
+    if not color_mesh_path.exists():
+        print(f"[Info] No color mesh found at {color_mesh_path}, skipping FBX export.")
+        return
+
+    print(f"[Info] Converting reconstructed mesh to FBX via Aspose utility: {color_mesh_path}")
+    cmd = [
+        "python",
+        "scripts/utils/convert_ply_to_fbx_aspose.py",
+        str(color_mesh_path),
+    ]
+
+    try:
+        subprocess.run(cmd, check=True)
+    except FileNotFoundError as e:
+        print(f"[Warning] Failed to launch FBX conversion script: {e}")
+    except subprocess.CalledProcessError as e:
+        print(f"[Warning] FBX conversion script exited with code {e.returncode}: {e}")
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--project_dir", type=Path, help="Path to project/session directory")
@@ -73,6 +95,7 @@ def main():
 
     start_ts = time.time()
     view_seconds = run_pipeline(project_dir)
+    convert_reconstruction_mesh_to_fbx(project_dir)
     end_ts = time.time()
 
     # Timing summary (write to file with per-image stats)
